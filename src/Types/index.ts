@@ -42,14 +42,14 @@ export type SocketConfig = CommonSocketConfig<AuthenticationState> & {
 export type UserFacingSocketConfig = Partial<SocketConfig> & { auth: AuthenticationState }
 
 export enum DisconnectReason {
-	connectionClosed = 428,
-	connectionLost = 408,
-    connectionReplaced = 440,
+    loggedOut = 401,
+    connectionLost = 403,
     timedOut = 408,
-	loggedOut = 401,
+    multideviceMismatch = 411,
+    connectionClosed = 428,
+    connectionReplaced = 440,
     badSession = 500,
     restartRequired = 515,
-    multideviceMismatch = 411
 }
 
 export type WAInitResponse = {
