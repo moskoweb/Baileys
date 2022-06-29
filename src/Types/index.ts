@@ -49,6 +49,7 @@ export enum DisconnectReason {
     connectionClosed = 428,
     connectionReplaced = 440,
     badSession = 500,
+    banned = 503,
     restartRequired = 515,
 }
 
