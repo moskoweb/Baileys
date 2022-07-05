@@ -183,14 +183,16 @@ When your connection is closed, an error is generated with the reason why the co
 
 ``` ts
 export enum DisconnectReason {
-	loggedOut           = 401, // Required Logout from Socket or User in the application.
-	connectionLost      = 403, // Connection was lost with WhatsApp or number was banned.
-	timedOut            = 408, // Waiting time for the very long connection.
-	multideviceMismatch = 411, // Incompatibility with multidevice.
-	connectionClosed    = 428, // Closed connection or without activities.
-	connectionReplaced  = 440, // Replaced connection, attempt of more than one equal connection.
-	badSession          = 500, // Bad connection or lost to the server.
-	restartRequired     = 515, // Required requirement for multidevice.
+	loggedOut            = 401, // Required Logout from Socket or User in the application.
+	connectionTerminated = 403, // Connection was terminated after number was banned.
+	connectionLost       = 408, // Connection was lost from Socket.
+	timedOut             = 408, // Waiting time for the very long connection.
+	multideviceMismatch  = 411, // Incompatibility with multidevice.
+	connectionClosed     = 428, // Closed connection or without activities.
+	connectionReplaced   = 440, // Replaced connection, attempt of more than one equal connection.
+	badSession           = 500, // Bad connection or lost to the server.
+	banned               = 503, // Number was banned from WhatsApp.
+	restartRequired      = 515, // Restart required for multiple devices.
 }
 ```
 
