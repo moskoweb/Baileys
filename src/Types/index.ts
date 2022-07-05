@@ -43,7 +43,8 @@ export type UserFacingSocketConfig = Partial<SocketConfig> & { auth: Authenticat
 
 export enum DisconnectReason {
     loggedOut = 401,
-    connectionLost = 403,
+    connectionTerminated = 403,
+    connectionLost = 408,
     timedOut = 408,
     multideviceMismatch = 411,
     connectionClosed = 428,
