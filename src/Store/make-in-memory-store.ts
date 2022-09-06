@@ -378,6 +378,23 @@ export default (
 			const { writeFileSync } = require('fs')
 			writeFileSync(path, JSON.stringify(toJSON()))
 		},
+		writeToMultiFiles: (folder: string) => {
+			// require fs here so that in case "fs" is not available -- the app does not crash
+			const { existsSync, mkdirSync, writeFileSync } = require('fs')
+			if (!existsSync(folder)) {
+				mkdirSync(folder, { recursive: true });
+			}
+
+			writeFileSync(folder + 'chats.json',
+				JSON.stringify(chats)
+			);
+			writeFileSync(folder + 'contacts.json',
+				JSON.stringify(contacts)
+			);
+			writeFileSync(folder + 'messages.json',
+				JSON.stringify(messages)
+			);
+		},
 		readFromFile: (path: string) => {
 			// require fs here so that in case "fs" is not available -- the app does not crash
 			const { readFileSync, existsSync } = require('fs')
@@ -386,6 +403,53 @@ export default (
 				const jsonStr = readFileSync(path, { encoding: 'utf-8' })
 				const json = JSON.parse(jsonStr)
 				fromJSON(json)
+			}
+		},
+		writeToMultiFiles: (folder: string) => {
+			// require fs here so that in case "fs" is not available -- the app does not crash
+			const { existsSync, mkdirSync, writeFileSync } = require('fs')
+			if (folder.includes('.json')){
+				writeToFile(folder);
+			} else {
+				if (!existsSync(folder)) {
+					mkdirSync(folder, { recursive: true });
+				}
+
+				writeFileSync(folder + 'chats.json',
+					JSON.stringify(chats)
+				);
+				writeFileSync(folder + 'contacts.json',
+					JSON.stringify(contacts)
+				);
+				writeFileSync(folder + 'messages.json',
+					JSON.stringify(messages)
+				);
+			}
+		},
+		readFromMultiFiles: (folder: string) => {
+			// require fs here so that in case "fs" is not available -- the app does not crash
+			const { readFileSync, existsSync } = require('fs');
+			if (folder.includes('.json')){
+				readFromFile(folder);
+			} else {
+				if (existsSync(folder)) {
+					logger.debug({ folder }, 'reading from file');
+					const chats = JSON.parse(
+						readFileSync(folder + 'chats.json', { encoding: 'utf-8' })
+					);
+					const contacts = JSON.parse(
+						readFileSync(folder + 'contacts.json', { encoding: 'utf-8' })
+					);
+					const messages = JSON.parse(
+						readFileSync(folder + 'messages.json', { encoding: 'utf-8' })
+					);
+
+					fromJSON({
+						chats: chats,
+						contacts: contacts,
+						messages: messages,
+					});
+				}
 			}
 		}
 	}
