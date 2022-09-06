@@ -265,9 +265,13 @@ import makeWASocket, { makeInMemoryStore } from '@adiwajshing/baileys'
 const store = makeInMemoryStore({ })
 // can be read from a file
 store.readFromFile('./baileys_store.json')
+// or multi files
+store.readFromMultiFiles('./baileys_store/')
 // saves the state to a file every 10s
 setInterval(() => {
     store.writeToFile('./baileys_store.json')
+    // or multi files
+    store.writeToMultiFiles('./baileys_store/')
 }, 10_000)
 
 const sock = makeWASocket({ })
