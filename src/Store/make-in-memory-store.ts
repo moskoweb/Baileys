@@ -378,23 +378,6 @@ export default (
 			const { writeFileSync } = require('fs')
 			writeFileSync(path, JSON.stringify(toJSON()))
 		},
-		writeToMultiFiles: (folder: string) => {
-			// require fs here so that in case "fs" is not available -- the app does not crash
-			const { existsSync, mkdirSync, writeFileSync } = require('fs')
-			if (!existsSync(folder)) {
-				mkdirSync(folder, { recursive: true });
-			}
-
-			writeFileSync(folder + 'chats.json',
-				JSON.stringify(chats)
-			);
-			writeFileSync(folder + 'contacts.json',
-				JSON.stringify(contacts)
-			);
-			writeFileSync(folder + 'messages.json',
-				JSON.stringify(messages)
-			);
-		},
 		readFromFile: (path: string) => {
 			// require fs here so that in case "fs" is not available -- the app does not crash
 			const { readFileSync, existsSync } = require('fs')
