@@ -417,15 +417,24 @@ export default (
 			} else {
 				if (existsSync(folder)) {
 					logger.debug({ folder }, 'reading from file');
-					const chats = JSON.parse(
-						readFileSync(folder + 'chats.json', { encoding: 'utf-8' })
-					);
-					const contacts = JSON.parse(
-						readFileSync(folder + 'contacts.json', { encoding: 'utf-8' })
-					);
-					const messages = JSON.parse(
-						readFileSync(folder + 'messages.json', { encoding: 'utf-8' })
-					);
+					let chats = [];
+					if (!existsSync(folder + 'chats.json')) {
+						chats = JSON.parse(
+							readFileSync(folder + 'chats.json', { encoding: 'utf-8' })
+						);
+					}
+					let contacts = {};
+					if (!existsSync(folder + 'contacts.json')) {
+						contacts = JSON.parse(
+							readFileSync(folder + 'contacts.json', { encoding: 'utf-8' })
+						);
+					}
+					let messages = {};
+					if (!existsSync(folder + 'messages.json')) {
+						messages = JSON.parse(
+							readFileSync(folder + 'messages.json', { encoding: 'utf-8' })
+						);
+					}
 
 					fromJSON({
 						chats: chats,
