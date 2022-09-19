@@ -381,7 +381,7 @@ export default (
 		readFromFile: (path: string) => {
 			// require fs here so that in case "fs" is not available -- the app does not crash
 			const { readFileSync, existsSync } = require('fs')
-			if(existsSync(path)) {
+			if (existsSync(path)) {
 				logger.debug({ path }, 'reading from file')
 				const jsonStr = readFileSync(path, { encoding: 'utf-8' })
 				const json = JSON.parse(jsonStr)
@@ -391,8 +391,8 @@ export default (
 		writeToMultiFiles: (folder: string) => {
 			// require fs here so that in case "fs" is not available -- the app does not crash
 			const { existsSync, mkdirSync, writeFileSync } = require('fs')
-			if (folder.includes('.json')){
-				writeToFile(folder);
+			if (folder.includes('.json')) {
+				writeFileSync(folder, JSON.stringify(toJSON()))
 			} else {
 				if (!existsSync(folder)) {
 					mkdirSync(folder, { recursive: true });
@@ -412,11 +412,16 @@ export default (
 		readFromMultiFiles: (folder: string) => {
 			// require fs here so that in case "fs" is not available -- the app does not crash
 			const { readFileSync, existsSync } = require('fs');
-			if (folder.includes('.json')){
-				readFromFile(folder);
+			if (folder.includes('.json')) {
+				if (existsSync(folder)) {
+					logger.debug({ folder }, 'reading from file')
+					const jsonStr = readFileSync(folder, { encoding: 'utf-8' })
+					const json = JSON.parse(jsonStr)
+					fromJSON(json)
+				}
 			} else {
 				if (existsSync(folder)) {
-					logger.debug({ folder }, 'reading from file');
+					logger.debug({ folder }, 'reading from folder');
 					let chats = [];
 					if (!existsSync(folder + 'chats.json')) {
 						chats = JSON.parse(
