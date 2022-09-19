@@ -412,15 +412,13 @@ export default (
 		readFromMultiFiles: (folder: string) => {
 			// require fs here so that in case "fs" is not available -- the app does not crash
 			const { readFileSync, existsSync } = require('fs');
-			if (folder.includes('.json')) {
-				if (existsSync(folder)) {
+			if (existsSync(folder)) {
+				if (folder.includes('.json')) {
 					logger.debug({ folder }, 'reading from file')
 					const jsonStr = readFileSync(folder, { encoding: 'utf-8' })
 					const json = JSON.parse(jsonStr)
 					fromJSON(json)
-				}
-			} else {
-				if (existsSync(folder)) {
+				} else {
 					logger.debug({ folder }, 'reading from folder');
 					let chats = [];
 					if (!existsSync(folder + 'chats.json')) {
