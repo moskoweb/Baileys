@@ -802,10 +802,10 @@ export const assertMediaContent = (content: proto.IMessage | null | undefined) =
 
 /**
  * Decrypt/Get Poll Update Message Values
- * @param msg Full message info contains PollUpdateMessage
- * @param pollCreationData Poll Creation Data (see https://github.com/adiwajshing/Baileys/pull/2290#issuecomment-1309729014)
- * @param withSelectedOptions Get user's selected options
- * @return {Promise<{ hash: string[] } | { hash: string[], selectedOptions: string[] }>}
+ * @param msg Full message info contains PollUpdateMessage, you can use `msg`
+ * @param pollCreationData An object contains `encKey` (used to decrypt the poll message), `sender` (used to create decryption key), and `options` (you should fill it with poll options, e.g. Apple, Orange, etc...)
+ * @param withSelectedOptions Get user's selected options condition, set it to true if you want get the results.
+ * @return {Promise<{ hash: string[] } | { hash: string[], selectedOptions: string[] }>} Property `hash` is an array which contains selected options hash, you can use `comparePollMessage` to compare it with original values. Property `selectedOptions` is an array, and the results is from `comparePollMessage` function.
  */
 export const getPollUpdateMessage = async(
 	msg: WAProto.IWebMessageInfo,
