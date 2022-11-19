@@ -1,5 +1,6 @@
 import { Boom } from '@hapi/boom'
 import axios from 'axios'
+import { randomBytes } from 'crypto'
 import { promises as fs } from 'fs'
 import { Logger } from 'pino'
 import { proto } from '../../WAProto'
@@ -375,6 +376,37 @@ export const generateWAMessageContent = async(
 		})
 	} else if('listReply' in message) {
 		m.listResponseMessage = { ...message.listReply }
+	} else if('poll' in message) {
+		if(typeof message.poll.selectableCount !== 'number') {
+			message.poll.selectableCount = 0
+		}
+
+		if(!Array.isArray(message.poll.values)) {
+			throw new Boom('Invalid poll values', { statusCode: 400 })
+		}
+
+		if(message.poll.selectableCount < 0 || message.poll.selectableCount > message.poll.values.length) {
+			throw new Boom(
+				`poll.selectableCount in poll should be between 0 and ${
+					message.poll.values.length
+				} or equal to the items length`, { statusCode: 400 }
+			)
+		}
+
+		// link: https://github.com/adiwajshing/Baileys/pull/2290#issuecomment-1304413425
+		m.messageContextInfo = {
+			messageSecret: randomBytes(32), // encKey
+		}
+
+		m.pollCreationMessage = WAProto.Message.PollCreationMessage.fromObject({
+			name: message.poll.name,
+			selectableOptionsCount: message.poll.selectableCount,
+			options: message.poll.values.map(
+				value => WAProto.Message.PollCreationMessage.Option.fromObject({
+					optionName: value,
+				}),
+			),
+		})
 	} else {
 		m = await prepareWAMessageMedia(
 			message,
