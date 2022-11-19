@@ -27,6 +27,7 @@ import {
 import { isJidGroup, jidNormalizedUser } from '../WABinary'
 import { generateMessageID, unixTimestampSeconds } from './generics'
 import { downloadContentFromMessage, encryptedStream, generateThumbnail, getAudioDuration, MediaDownloadOptions } from './messages-media'
+import { comparePollMessage, decryptPollMessageRaw } from './messages-poll'
 
 type MediaUploadData = {
 	media: WAMediaUpload
@@ -797,4 +798,50 @@ export const assertMediaContent = (content: proto.IMessage | null | undefined) =
 	}
 
 	return mediaContent
+}
+
+/**
+ * Decrypt/Get Poll Update Message Values
+ * @param msg Full message info contains PollUpdateMessage
+ * @param pollCreationData Poll Creation Data (see https://github.com/adiwajshing/Baileys/pull/2290#issuecomment-1309729014)
+ * @param withSelectedOptions Get user's selected options
+ * @return {Promise<{ hash: string[] } | { hash: string[], selectedOptions: string[] }>}
+ */
+export const getPollUpdateMessage = async(
+	msg: WAProto.IWebMessageInfo,
+	pollCreationData: { encKey: Uint8Array; sender: string; options: string[]; },
+	withSelectedOptions: boolean = false,
+): Promise<{ hash: string[] } | { hash: string[]; selectedOptions: string[] }> => {
+	if(!msg.message?.pollUpdateMessage || !pollCreationData?.encKey) {
+		throw new Boom('Missing pollUpdateMessage, or encKey', { statusCode: 400 })
+	}
+
+	pollCreationData.sender = msg.message?.pollUpdateMessage?.pollCreationMessageKey?.participant || pollCreationData.sender
+	if(!pollCreationData.sender?.length) {
+		throw new Boom('Missing sender', { statusCode: 400 })
+	}
+
+	let hash = await decryptPollMessageRaw(
+		pollCreationData.encKey, // encKey
+		msg.message?.pollUpdateMessage?.vote?.encPayload!, // enc payload
+		msg.message?.pollUpdateMessage?.vote?.encIv!, // enc iv
+		jidNormalizedUser(pollCreationData.sender), // sender
+		msg.message?.pollUpdateMessage?.pollCreationMessageKey?.id!, // poll id
+		jidNormalizedUser(
+			msg.key.remoteJid?.endsWith('@g.us') ?
+				(msg.key.participant || msg.participant)! : msg.key.remoteJid!
+		), // voter
+	)
+
+	if(hash.length === 1 && !hash[0].length) {
+		hash = []
+	}
+
+	return withSelectedOptions ? {
+		hash,
+		selectedOptions: await comparePollMessage(
+			pollCreationData.options || [],
+			hash,
+		)
+	} : { hash }
 }
