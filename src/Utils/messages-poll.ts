@@ -1,5 +1,10 @@
 // original code: https://gist.github.com/PurpShell/44433d21631ff0aefbea57f7b5e31139
 
+/**
+ * Create crypto instance.
+ * @description If your nodejs crypto module doesn't have WebCrypto, you must install `@peculiar/webcrypto` first
+ * @return {Crypto}
+ */
 export const getCrypto = (): Crypto => {
 	const c = require('crypto')
 
@@ -9,7 +14,7 @@ export const getCrypto = (): Crypto => {
 /**
      * Compare the SHA-256 hashes of the poll options from the update to find the original choices
      * @param options Options from the poll creation message
-     * @param pollOptionHash hash from `decryptPollMessageRaw()`
+     * @param pollOptionHashes hash from `decryptPollMessageRaw()`
      * @return {Promise<string[]>} the original option, can be empty when none are currently selected
      */
 export const comparePollMessage = async(options: string[], pollOptionHashes: string[]): Promise<string[]> => {
@@ -37,10 +42,10 @@ export const comparePollMessage = async(options: string[], pollOptionHashes: str
 /**
      * Raw method to decrypt the message after gathering all information
      * @description Use `decryptPollMessage()` instead, only use this if you know what you are doing
-     * @param encPayload Vote encrypted payload
-     * @param encIv vote encrypted iv
-     * @param additionalData poll additional data
-     * @param decryptionKey generated decryption key
+     * @param encPayload Encryption payload/contents want to decrypt, you can get it from `pollUpdateMessage.vote.encPayload`
+     * @param encIv Encryption iv (used to decrypt the payload), you can get it from `pollUpdateMessage.vote.encIv`
+     * @param additionalData poll Additional data to decrypt poll message
+     * @param decryptionKey Generated decryption key to decrypt the poll message
      * @return {Promise<Uint8Array>}
      */
 const decryptPollMessageInternal = async(
@@ -76,13 +81,13 @@ export const decodePollMessage = (decryptedMessage: Uint8Array): string => {
 }
 
 /**
-     * decrypt a poll message update
-     * @param encPayload from the update
-     * @param encIv from the update
-     * @param encKey from the original poll
-     * @param pollMsgSender sender jid of the pollCreation message
-     * @param pollMsgId id of the pollCreation message
-     * @param voteMsgSender sender of the pollUpdate message
+     * raw function to decrypt a poll message update
+     * @param encPayload Encryption payload/contents want to decrypt, you can get it from `pollUpdateMessage.vote.encPayload`
+     * @param encIv Encryption iv (used to decrypt the payload), you can get it from `pollUpdateMessage.vote.encIv`
+     * @param encKey Encryption key (used to decrypt the payload), you need to store/save the encKey. If you want get the encKey, you could get it from `Message.messageContextInfo.messageSecret`, only available on poll creation message.
+     * @param pollMsgSender sender The sender's jid of poll message, you can use `pollUpdateMessage.pollCreationMessageKey.participant` (Note: you need to normalize the jid first)
+     * @param pollMsgId The ID of poll message, you can use `pollUpdateMessage.pollMessageCreationKey.id`
+     * @param voteMsgSender The poll voter's jid, you can use `Message.key.remoteJid`, `Message.key.participant`, or `Message.participant`. (Note: you need to normalize the jid first)
      * @return {Promise<string[]>} The option or empty array if something went wrong OR everything was unticked
      */
 export const decryptPollMessageRaw = async(
