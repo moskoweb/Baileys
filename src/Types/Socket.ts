@@ -46,8 +46,8 @@ export type SocketConfig = {
     qrTimeout?: number;
     /** provide an auth state object to maintain the auth state */
     auth: AuthenticationState
-    /** By default true, should history messages be downloaded and processed */
-    downloadHistory: boolean
+    /** manage history processing with this control; by default will sync up everything */
+    shouldSyncHistoryMessage: (msg: proto.Message.IHistorySyncNotification) => boolean
     /** transaction capability options for SignalKeyStore */
     transactionOpts: TransactionCapabilityOptions
     /** provide a cache to store a user's device list */
@@ -69,6 +69,27 @@ export type SocketConfig = {
      * entails uploading the jpegThumbnail to WA
      * */
     generateHighQualityLinkPreview: boolean
+
+    /**
+     * Returns if a jid should be ignored,
+     * no event for that jid will be triggered.
+     * Messages from that jid will also not be decrypted
+     * */
+    shouldIgnoreJid: (jid: string) => boolean | undefined
+
+    /**
+     * Optionally patch the message before sending out
+     * */
+    patchMessageBeforeSending: (
+        msg: proto.IMessage,
+        recipientJids: string[],
+    ) => Promise<proto.IMessage> | proto.IMessage
+
+    /** verify app state MACs */
+    appStateMacVerification: {
+        patch: boolean
+        snapshot: boolean
+    }
 
     /** options for axios */
     options: AxiosRequestConfig<any>

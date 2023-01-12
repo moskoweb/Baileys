@@ -373,6 +373,8 @@ export const generateWAMessageContent = async(
 				productImage: imageMessage,
 			}
 		})
+	} else if('listReply' in message) {
+		m.listResponseMessage = { ...message.listReply }
 	} else {
 		m = await prepareWAMessageMedia(
 			message,
@@ -567,12 +569,31 @@ export const getContentType = (content: WAProto.IMessage | undefined) => {
  * @returns
  */
 export const normalizeMessageContent = (content: WAMessageContent | null | undefined): WAMessageContent | undefined => {
-	content = content?.ephemeralMessage?.message?.viewOnceMessage?.message ||
-				content?.ephemeralMessage?.message ||
-				content?.viewOnceMessage?.message ||
-				content ||
-				undefined
-	return content
+	if(!content) {
+		return undefined
+	}
+
+	// set max iterations to prevent an infinite loop
+	for(let i = 0;i < 5;i++) {
+		const inner = getFutureProofMessage(content)
+		if(!inner) {
+			break
+		}
+
+		content = inner.message
+	}
+
+	return content!
+
+	function getFutureProofMessage(message: typeof content) {
+		return (
+			message?.ephemeralMessage
+			|| message?.viewOnceMessage
+			|| message?.documentWithCaptionMessage
+			|| message?.viewOnceMessageV2
+			|| message?.editedMessage
+		)
+	}
 }
 
 /**
@@ -590,7 +611,12 @@ export const extractMessageContent = (content: WAMessageContent | undefined | nu
 		} else if(msg.locationMessage) {
 			return { locationMessage: msg.locationMessage }
 		} else {
-			return { conversation: 'contentText' in msg ? msg.contentText : ('hydratedContentText' in msg ? msg.hydratedContentText : '') }
+			return {
+				conversation:
+					'contentText' in msg
+						? msg.contentText
+						: ('hydratedContentText' in msg ? msg.hydratedContentText : '')
+			}
 		}
 	}
 
@@ -763,37 +789,4 @@ export const assertMediaContent = (content: proto.IMessage | null | undefined) =
 	}
 
 	return mediaContent
-}
-
-
-const generateContextInfo = () => {
-	const info: proto.IMessageContextInfo = {
-		deviceListMetadataVersion: 2,
-		deviceListMetadata: { }
-	}
-	return info
-}
-
-/**
- * this is an experimental patch to make buttons work
- * Don't know how it works, but it does for now
- */
-export const patchMessageForMdIfRequired = (message: proto.IMessage) => {
-	const requiresPatch = !!(
-		message.buttonsMessage
-		// || message.templateMessage
-		|| message.listMessage
-	)
-	if(requiresPatch) {
-		message = {
-			viewOnceMessage: {
-				message: {
-					messageContextInfo: generateContextInfo(),
-					...message
-				}
-			}
-		}
-	}
-
-	return message
 }
