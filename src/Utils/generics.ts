@@ -138,13 +138,13 @@ export const delayCancellable = (ms: number) => {
 
 export async function promiseTimeout<T>(ms: number | undefined, promise: (resolve: (v?: T)=>void, reject: (error) => void) => void) {
 	if(!ms) {
-		return new Promise (promise)
+		return new Promise(promise)
 	}
 
 	const stack = new Error().stack
 	// Create a promise that rejects in <ms> milliseconds
 	const { delay, cancel } = delayCancellable (ms)
-	const p = new Promise ((resolve, reject) => {
+	const p = new Promise((resolve, reject) => {
 		delay
 			.then(() => reject(
 				new Boom('Timed Out', {
@@ -348,12 +348,15 @@ const UNEXPECTED_SERVER_CODE_TEXT = 'Unexpected server response: '
 
 export const getCodeFromWSError = (error: Error) => {
 	let statusCode = 500
-	if(error.message.includes(UNEXPECTED_SERVER_CODE_TEXT)) {
+	if(error?.message?.includes(UNEXPECTED_SERVER_CODE_TEXT)) {
 		const code = +error.message.slice(UNEXPECTED_SERVER_CODE_TEXT.length)
 		if(!Number.isNaN(code) && code >= 400) {
 			statusCode = code
 		}
-	} else if((error as any).code?.startsWith('E')) { // handle ETIMEOUT, ENOTFOUND etc
+	} else if(
+		(error as any).code?.startsWith('E')
+		|| error?.message?.includes('timed out')
+	) { // handle ETIMEOUT, ENOTFOUND etc
 		statusCode = 408
 	}
 
