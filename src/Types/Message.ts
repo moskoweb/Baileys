@@ -123,7 +123,7 @@ export type WASendableProduct = Omit<proto.Message.ProductMessage.IProductSnapsh
 export type AnyRegularMessageContent = (
     ({
 	    text: string
-        linkPreview?: WAUrlInfo | null
+        linkPreview?: WAUrlInfo | undefined
     }
     & Mentionable & Buttonable & Templatable & Listable)
     | AnyMediaMessageContent
