@@ -214,6 +214,24 @@ type ConnectionState = {
 
 **Note:** this also offers any updates to the QR
 
+### Definition of Disconnection Reasons
+When your connection is closed, an error is generated with the reason why the connection has been closed, you can do the treatment you want for each reason, being defined as below:
+
+``` ts
+export enum DisconnectReason {
+	loggedOut            = 401, // Required Logout from Socket or User in the application.
+	connectionTerminated = 403, // Connection was terminated after number was banned.
+	connectionLost       = 408, // Connection was lost from Socket.
+	timedOut             = 408, // Waiting time for the very long connection.
+	multideviceMismatch  = 411, // Incompatibility with multi-device WA.
+	connectionClosed     = 428, // Closed connection or without activities.
+	connectionReplaced   = 440, // Replaced connection, attempt of more than one equal connection.
+	badSession           = 500, // Bad connection or lost to the server.
+	banned               = 503, // Number was banned from WhatsApp.
+	restartRequired      = 515, // Restart required for multi-device WA.
+}
+```
+
 ## Handling Events
 
 Baileys uses the EventEmitter syntax for events. 
@@ -664,8 +682,7 @@ WA uses an encrypted form of communication to send chat/app updates. This has be
     { clear: { messages: [{ id: 'ATWYHDNNWU81732J', fromMe: true, timestamp: "1654823909" }] } }, 
     '123456@s.whatsapp.net', 
     []
-    )
-
+  )
   ```
 
 - Delete a chat
@@ -705,7 +722,6 @@ await sock.sendMessage(
     jid, 
     { disappearingMessagesInChat: false }
 )
-
 ```
 
 ## Misc
