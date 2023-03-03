@@ -1,8 +1,8 @@
 {
-  "name": "@adiwajshing/baileys",
+  "name": "@moskoweb/baileys",
   "version": "5.0.0",
   "description": "WhatsApp API",
-  "homepage": "https://github.com/adiwajshing/Baileys",
+  "homepage": "https://github.com/moskoweb/Baileys",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "keywords": [
@@ -27,10 +27,10 @@
     "lint": "eslint . --ext .js,.ts,.jsx,.tsx",
     "lint:fix": "eslint . --fix --ext .js,.ts,.jsx,.tsx"
   },
-  "author": "Adhiraj Singh",
+  "author": "Mosko Digital",
   "license": "MIT",
   "repository": {
-    "url": "git@github.com:adiwajshing/baileys.git"
+    "url": "git@github.com:moskoweb/baileys.git"
   },
   "dependencies": {
     "@hapi/boom": "^9.1.3",
