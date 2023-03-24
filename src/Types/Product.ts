@@ -3,13 +3,12 @@ import { WAMediaUpload } from './Message'
 export type CatalogResult = {
 	data: {
 		paging: { cursors: { before: string, after: string } }
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		data: any[]
 	}
 }
 
 export type ProductCreateResult = {
-	data: { product: {} }
+	data: { product: any }
 }
 
 export type CatalogStatus = {

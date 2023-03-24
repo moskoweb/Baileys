@@ -29,7 +29,6 @@ export const makeSocket = ({
 	transactionOpts,
 	qrTimeout,
 	options,
-	makeSignalRepository
 }: SocketConfig) => {
 	const ws = new WebSocket(waWebSocketUrl, undefined, {
 		origin: DEFAULT_ORIGIN,
@@ -49,7 +48,6 @@ export const makeSocket = ({
 	const { creds } = authState
 	// add transaction capability
 	const keys = addTransactionCapability(authState.keys, logger, transactionOpts)
-	const signalRepository = makeSignalRepository({ creds, keys })
 
 	let lastDateRecv: Date
 	let epoch = 1
@@ -92,26 +90,24 @@ export const makeSocket = ({
 	}
 
 	/** log & process any unexpected errors */
-	const onUnexpectedError = (err: Error | Boom, msg: string) => {
+	const onUnexpectedError = (error: Error, msg: string) => {
 		logger.error(
-			{ err },
+			{ trace: error.stack, output: (error as any).output },
 			`unexpected error in '${msg}'`
 		)
 	}
 
 	/** await the next incoming message */
-	const awaitNextMessage = async<T>(sendMsg?: Uint8Array) => {
+	const awaitNextMessage = async(sendMsg?: Uint8Array) => {
 		if(ws.readyState !== ws.OPEN) {
-			throw new Boom('Connection Closed', {
-				statusCode: DisconnectReason.connectionClosed
-			})
+			throw new Boom('Connection Closed', { statusCode: DisconnectReason.connectionClosed })
 		}
 
-		let onOpen: (data: T) => void
+		let onOpen: (data: any) => void
 		let onClose: (err: Error) => void
 
-		const result = promiseTimeout<T>(connectTimeoutMs, (resolve, reject) => {
-			onOpen = resolve
+		const result = promiseTimeout<any>(connectTimeoutMs, (resolve, reject) => {
+			onOpen = (data: any) => resolve(data)
 			onClose = mapWebSocketError(reject)
 			ws.on('frame', onOpen)
 			ws.on('close', onClose)
@@ -136,11 +132,11 @@ export const makeSocket = ({
      * @param json query that was sent
      * @param timeoutMs timeout after which the promise will reject
      */
-	 const waitForMessage = async<T>(msgId: string, timeoutMs = defaultQueryTimeoutMs) => {
+	 const waitForMessage = async(msgId: string, timeoutMs = defaultQueryTimeoutMs) => {
 		let onRecv: (json) => void
 		let onErr: (err) => void
 		try {
-			const result = await promiseTimeout<T>(timeoutMs,
+			const result = await promiseTimeout(timeoutMs,
 				(resolve, reject) => {
 					onRecv = resolve
 					onErr = err => {
@@ -152,7 +148,7 @@ export const makeSocket = ({
 					ws.off('error', onErr)
 				},
 			)
-			return result
+			return result as any
 		} finally {
 			ws.off(`TAG:${msgId}`, onRecv!)
 			ws.off('close', onErr!) // if the socket closes, you'll never receive the message
@@ -190,7 +186,7 @@ export const makeSocket = ({
 
 		const init = proto.HandshakeMessage.encode(helloMsg).finish()
 
-		const result = await awaitNextMessage<Uint8Array>(init)
+		const result = await awaitNextMessage(init)
 		const handshake = proto.HandshakeMessage.decode(result)
 
 		logger.trace({ handshake }, 'handshake recv from WA Web')
@@ -595,7 +591,6 @@ export const makeSocket = ({
 		ws,
 		ev,
 		authState: { creds, keys },
-		signalRepository,
 		get user() {
 			return authState.creds.me
 		},

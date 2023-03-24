@@ -97,21 +97,15 @@ export const addTransactionCapability = (
 	 * prefetches some data and stores in memory,
 	 * useful if these data points will be used together often
 	 * */
-	const prefetch = async<T extends keyof SignalDataTypeMap>(type: T, ids: string[]) => {
+	const prefetch = async(type: keyof SignalDataTypeMap, ids: string[]) => {
 		const dict = transactionCache[type]
-		const idsRequiringFetch = dict
-			? ids.filter(item => typeof dict[item] !== 'undefined')
-			: ids
+		const idsRequiringFetch = dict ? ids.filter(item => !(item in dict)) : ids
 		// only fetch if there are any items to fetch
 		if(idsRequiringFetch.length) {
 			dbQueriesInTransaction += 1
 			const result = await state.get(type, idsRequiringFetch)
 
-			transactionCache[type] ||= {}
-			transactionCache[type] = Object.assign(
-				transactionCache[type]!,
-				result
-			)
+			transactionCache[type] = Object.assign(transactionCache[type] || { }, result)
 		}
 	}
 

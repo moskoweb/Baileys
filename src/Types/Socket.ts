@@ -4,9 +4,8 @@ import type { Agent } from 'https'
 import type { Logger } from 'pino'
 import type { URL } from 'url'
 import { proto } from '../../WAProto'
-import { AuthenticationState, SignalAuthState, TransactionCapabilityOptions } from './Auth'
+import { AuthenticationState, TransactionCapabilityOptions } from './Auth'
 import { MediaConnInfo } from './Message'
-import { SignalRepository } from './Signal'
 
 export type WAVersion = [number, number, number]
 export type WABrowserDescription = [string, string, string]
@@ -107,10 +106,7 @@ export type SocketConfig = {
     options: AxiosRequestConfig<{}>
     /**
      * fetch a message from your store
-     * implement this so that messages failed to send
-     * (solves the "this message can take a while" issue) can be retried
+     * implement this so that messages failed to send (solves the "this message can take a while" issue) can be retried
      * */
     getMessage: (key: proto.IMessageKey) => Promise<proto.IMessage | undefined>
-
-    makeSignalRepository: (auth: SignalAuthState) => SignalRepository
 }
