@@ -7,7 +7,7 @@ import { extractImageThumb, getHttpStream } from './messages-media'
 const THUMBNAIL_WIDTH_PX = 192
 
 /** Fetches an image and generates a thumbnail for it */
-const getCompressedJpegThumbnail = async(
+const getCompressedJpegThumbnail = async (
 	url: string,
 	{ thumbnailWidth, fetchOpts }: URLGenerationOptions
 ) => {
@@ -34,7 +34,7 @@ export type URLGenerationOptions = {
  * @param text first matched URL in text
  * @returns the URL info required to generate link preview
  */
-export const getUrlInfo = async(
+export const getUrlInfo = async (
 	text: string,
 	opts: URLGenerationOptions = {
 		thumbnailWidth: THUMBNAIL_WIDTH_PX,
@@ -45,11 +45,11 @@ export const getUrlInfo = async(
 		// retries
 		const retries = 0
 		const maxRetry = 5
-		
+
 		const { getLinkPreview } = await import('link-preview-js')
 		let previewLink = text
 
-		if(!text.startsWith('https://') && !text.startsWith('http://')) {
+		if (!text.startsWith('https://') && !text.startsWith('http://')) {
 			previewLink = 'https://' + previewLink
 		}
 
@@ -62,6 +62,7 @@ export const getUrlInfo = async(
 				if (retries >= maxRetry) {
 					return false
 				}
+
 				if (
 					forwardedURLObj.hostname === urlObj.hostname
 					|| forwardedURLObj.hostname === 'www.' + urlObj.hostname
@@ -73,21 +74,21 @@ export const getUrlInfo = async(
 					return false
 				}
 			},
+
 			headers: opts.fetchOpts as {}
 		})
-		if(info && 'title' in info && info.title) {
+		if (info && 'title' in info && info.title) {
 			const [image] = info.images
 
 			const urlInfo: WAUrlInfo = {
 				'canonical-url': info.url,
-				// SW-803 You must pass link starting with http(s) in 'matched-text'. 'text' does not contain it
-				'matched-text': info.url,
+				'matched-text': text,
 				title: info.title,
 				description: info.description,
 				originalThumbnailUrl: image
 			}
 
-			if(opts.uploadImage) {
+			if (opts.uploadImage) {
 				const { imageMessage } = await prepareWAMessageMedia(
 					{ image: { url: image } },
 					{
@@ -105,7 +106,7 @@ export const getUrlInfo = async(
 					urlInfo.jpegThumbnail = image
 						? (await getCompressedJpegThumbnail(image, opts)).buffer
 						: undefined
-				} catch(error) {
+				} catch (error) {
 					opts.logger?.debug(
 						{ err: error.stack, url: previewLink },
 						'error in generating thumbnail'
@@ -115,8 +116,8 @@ export const getUrlInfo = async(
 
 			return urlInfo
 		}
-	} catch(error) {
-		if(!error.message.includes('receive a valid')) {
+	} catch (error) {
+		if (!error.message.includes('receive a valid')) {
 			throw error
 		}
 	}

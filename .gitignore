@@ -15,5 +15,3 @@ Proxy
 messages*.json
 test.ts
 TestData
-.vscode
-.vscode/launch.json

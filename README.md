@@ -1,20 +1,21 @@
 # Baileys - Typescript/Javascript WhatsApp Web API
-
-Baileys does not require Selenium or any other browser to be interface with WhatsApp Web, it does so directly using a **WebSocket**. 
-Not running Selenium or Chromimum saves you like **half a gig** of ram :/ 
-Baileys supports interacting with the multi-device & web versions of WhatsApp.
-Thank you to [@pokearaujo](https://github.com/pokearaujo/multidevice) for writing his observations on the workings of WhatsApp Multi-Device. Also, thank you to [@Sigalor](https://github.com/sigalor/whatsapp-web-reveng) for writing his observations on the workings of WhatsApp Web and thanks to [@Rhymen](https://github.com/Rhymen/go-whatsapp/) for the __go__ implementation.
  
-## Please Read
+ Baileys does not require Selenium or any other browser to be interface with WhatsApp Web, it does so directly using a **WebSocket**. Not running Selenium or Chromimum saves you like **half a gig** of ram :/ 
 
-The original repository had to be removed by the original author - we now continue development in this repository here.
-This is the only official repository and is maintained by the community.
+ Baileys supports interacting with the multi-device & web versions of WhatsApp.
+
+ Thank you to [@pokearaujo](https://github.com/pokearaujo/multidevice) for writing his observations on the workings of WhatsApp Multi-Device. Also, thank you to [@Sigalor](https://github.com/sigalor/whatsapp-web-reveng) for writing his observations on the workings of WhatsApp Web and thanks to [@Rhymen](https://github.com/Rhymen/go-whatsapp/) for the __go__ implementation.
+
+ Baileys is type-safe, extensible and simple to use. If you require more functionality than provided, it's super easy to write an extension. More on this [here](#WritingCustomFunctionality).
+ 
+ If you're interested in building a WhatsApp bot, you may wanna check out [WhatsAppInfoBot](https://github.com/adiwajshing/WhatsappInfoBot) and an actual bot built with it, [Messcat](https://github.com/ashokatechmin/Messcat).
+
+ **Read the docs [here](https://adiwajshing.github.io/Baileys)**
  **Join the Discord [here](https://discord.gg/WeJM5FP9GG)**
- 
+
 ## Example
 
-Do check out & run [example.ts](
-/blob/master/Example/example.ts) to see an example usage of the library.
+Do check out & run [example.ts](https://github.com/adiwajshing/Baileys/blob/master/Example/example.ts) to see an example usage of the library.
 The script covers most common use cases.
 To run the example script, download or clone the repo and then type the following in a terminal:
 1. ``` cd path/to/Baileys ```
@@ -25,12 +26,12 @@ To run the example script, download or clone the repo and then type the followin
 
 Use the stable version:
 ```
-temporarily unavailable
+yarn add @adiwajshing/baileys
 ```
 
 Use the edge version (no guarantee of stability, but latest fixes + features)
 ```
-yarn add github:WhiskeySockets/Baileys
+yarn add github:adiwajshing/baileys
 ```
 
 Then import your code using:
@@ -213,6 +214,24 @@ type ConnectionState = {
 
 **Note:** this also offers any updates to the QR
 
+### Definition of Disconnection Reasons
+When your connection is closed, an error is generated with the reason why the connection has been closed, you can do the treatment you want for each reason, being defined as below:
+
+``` ts
+export enum DisconnectReason {
+	loggedOut            = 401, // Required Logout from Socket or User in the application.
+	connectionTerminated = 403, // Connection was terminated after number was banned.
+	connectionLost       = 408, // Connection was lost from Socket.
+	timedOut             = 408, // Waiting time for the very long connection.
+	multideviceMismatch  = 411, // Incompatibility with multi-device WA.
+	connectionClosed     = 428, // Closed connection or without activities.
+	connectionReplaced   = 440, // Replaced connection, attempt of more than one equal connection.
+	badSession           = 500, // Bad connection or lost to the server.
+	banned               = 503, // Number was banned from WhatsApp.
+	restartRequired      = 515, // Restart required for multi-device WA.
+}
+```
+
 ## Handling Events
 
 Baileys uses the EventEmitter syntax for events. 
@@ -294,9 +313,13 @@ import makeWASocket, { makeInMemoryStore } from '@adiwajshing/baileys'
 const store = makeInMemoryStore({ })
 // can be read from a file
 store.readFromFile('./baileys_store.json')
+// or multi files
+store.readFromMultiFiles('./baileys_store/')
 // saves the state to a file every 10s
 setInterval(() => {
     store.writeToFile('./baileys_store.json')
+    // or multi files
+    store.writeToMultiFiles('./baileys_store/')
 }, 10_000)
 
 const sock = makeWASocket({ })
@@ -659,8 +682,7 @@ WA uses an encrypted form of communication to send chat/app updates. This has be
     { clear: { messages: [{ id: 'ATWYHDNNWU81732J', fromMe: true, timestamp: "1654823909" }] } }, 
     '123456@s.whatsapp.net', 
     []
-    )
-
+  )
   ```
 
 - Delete a chat
@@ -700,7 +722,6 @@ await sock.sendMessage(
     jid, 
     { disappearingMessagesInChat: false }
 )
-
 ```
 
 ## Misc
