@@ -1,6 +1,6 @@
 {
   "name": "@moskoweb/baileys",
-  "version": "5.0.0",
+  "version": "5.1.2",
   "description": "WhatsApp API",
   "homepage": "https://github.com/moskoweb/Baileys",
   "main": "lib/index.js",
