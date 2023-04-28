@@ -143,7 +143,7 @@ export const delayCancellable = (ms: number) => {
 	return { delay, cancel }
 }
 
-export async function promiseTimeout<T>(ms: number | undefined, promise: (resolve: (v?: T) => void, reject: (error) => void) => void) {
+export async function promiseTimeout<T>(ms: number | undefined, promise: (resolve: (v: T) => void, reject: (error) => void) => void) {
 	if(!ms) {
 		return new Promise(promise)
 	}
@@ -177,7 +177,7 @@ export function bindWaitForEvent<T extends keyof BaileysEventMap>(ev: BaileysEve
 		let listener: (item: BaileysEventMap[T]) => void
 		let closeListener: any
 		await (
-			promiseTimeout(
+			promiseTimeout<void>(
 				timeoutMs,
 				(resolve, reject) => {
 					closeListener = ({ connection, lastDisconnect }) => {
@@ -355,7 +355,7 @@ const UNEXPECTED_SERVER_CODE_TEXT = 'Unexpected server response: '
 
 export const getCodeFromWSError = (error: Error) => {
 	let statusCode = 500
-	if(error?.message?.includes(UNEXPECTED_SERVER_CODE_TEXT)) {
+	if(error.message.includes(UNEXPECTED_SERVER_CODE_TEXT)) {
 		const code = +error.message.slice(UNEXPECTED_SERVER_CODE_TEXT.length)
 		if(!Number.isNaN(code) && code >= 400) {
 			statusCode = code

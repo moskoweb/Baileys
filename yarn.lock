@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@adiwajshing/eslint-config@git+https://github.com/adiwajshing/eslint-config":
+"@adiwajshing/eslint-config@https://github.com/adiwajshing/eslint-config.git":
   version "1.0.0"
   resolved "git+ssh://git@github.com/adiwajshing/eslint-config.git"
   integrity sha512-HULNoC+LBV0TG/ckR7Tnd78ML7sxCk4v8trlFma7ATE5OsrpUhhwKqL5UFjyHMjiHfPrpFtlyy9r36f0XWkqew==
@@ -3483,7 +3483,7 @@ levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
-"libsignal@git+https://github.com/adiwajshing/libsignal-node":
+"libsignal@https://github.com/adiwajshing/libsignal-node.git":
   version "2.0.1"
   resolved "git+ssh://git@github.com/adiwajshing/libsignal-node.git"
   integrity sha512-ViglXJXlOHNYU2usuSaLfS7fIDkZE0LJeOZdWNNlnIyQWiGwTnD6O4W9RfUUb9Rq+/iLOJdaCOrW6l7XSuCBng==

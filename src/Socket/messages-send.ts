@@ -4,7 +4,7 @@ import NodeCache from 'node-cache'
 import { proto } from '../../WAProto'
 import { DEFAULT_CACHE_TTLS, WA_DEFAULT_EPHEMERAL } from '../Defaults'
 import { AnyMessageContent, MediaConnInfo, MessageReceiptType, MessageRelayOptions, MiscMessageGenerationOptions, SocketConfig, WAMessageKey } from '../Types'
-import { aggregateMessageKeysNotFromMe, assertMediaContent, bindWaitForEvent, decryptMediaRetryData, encodeSignedDeviceIdentity, encodeWAMessage, encryptMediaRetryRequest, encryptSenderKeyMsgSignalProto, encryptSignalProto, extractDeviceJids, generateMessageID, generateWAMessage, getStatusCodeForMediaRetry, getUrlFromDirectPath, getWAUploadToServer, jidToSignalProtocolAddress, parseAndInjectE2ESessions, unixTimestampSeconds } from '../Utils'
+import { aggregateMessageKeysNotFromMe, assertMediaContent, bindWaitForEvent, decryptMediaRetryData, encodeSignedDeviceIdentity, encodeWAMessage, encryptMediaRetryRequest, extractDeviceJids, generateMessageID, generateWAMessage, getStatusCodeForMediaRetry, getUrlFromDirectPath, getWAUploadToServer, parseAndInjectE2ESessions, unixTimestampSeconds } from '../Utils'
 import { getUrlInfo } from '../Utils/link-preview'
 import { areJidsSameUser, BinaryNode, BinaryNodeAttributes, getBinaryNodeChild, getBinaryNodeChildren, isJidGroup, isJidUser, jidDecode, jidEncode, jidNormalizedUser, JidWithDevice, S_WHATSAPP_NET } from '../WABinary'
 import { makeGroupsSocket } from './groups'
@@ -23,6 +23,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 		ev,
 		authState,
 		processingMutex,
+		signalRepository,
 		upsertMessage,
 		query,
 		fetchPrivacySettings,
@@ -216,10 +217,14 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 		if(force) {
 			jidsRequiringFetch = jids
 		} else {
-			const addrs = jids.map(jid => jidToSignalProtocolAddress(jid).toString())
+			const addrs = jids.map(jid => (
+				signalRepository
+					.jidToSignalProtocolAddress(jid)
+			))
 			const sessions = await authState.keys.get('session', addrs)
 			for(const jid of jids) {
-				const signalId = jidToSignalProtocolAddress(jid).toString()
+				const signalId = signalRepository
+					.jidToSignalProtocolAddress(jid)
 				if(!sessions[signalId]) {
 					jidsRequiringFetch.push(jid)
 				}
@@ -248,7 +253,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 					}
 				]
 			})
-			await parseAndInjectE2ESessions(result, authState)
+			await parseAndInjectE2ESessions(result, signalRepository)
 
 			didFetchNewSession = true
 		}
@@ -268,7 +273,8 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 		const nodes = await Promise.all(
 			jids.map(
 				async jid => {
-					const { type, ciphertext } = await encryptSignalProto(jid, bytes, authState)
+					const { type, ciphertext } = await signalRepository
+						.encryptMessage({ jid, data: bytes })
 					if(type === 'pkmsg') {
 						shouldIncludeDeviceIdentity = true
 					}
@@ -367,11 +373,12 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 					const patched = await patchMessageBeforeSending(message, devices.map(d => jidEncode(d.user, 's.whatsapp.net', d.device)))
 					const bytes = encodeWAMessage(patched)
 
-					const { ciphertext, senderKeyDistributionMessageKey } = await encryptSenderKeyMsgSignalProto(
-						destinationJid,
-						bytes,
-						meId,
-						authState
+					const { ciphertext, senderKeyDistributionMessage } = await signalRepository.encryptGroupMessage(
+						{
+							group: destinationJid,
+							data: bytes,
+							meId,
+						}
 					)
 
 					const senderKeyJids: string[] = []
@@ -392,7 +399,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 
 						const senderKeyMsg: proto.IMessage = {
 							senderKeyDistributionMessage: {
-								axolotlSenderKeyDistributionMessage: senderKeyDistributionMessageKey,
+								axolotlSenderKeyDistributionMessage: senderKeyDistributionMessage,
 								groupId: destinationJid
 							}
 						}
@@ -498,7 +505,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 				}
 
 				const buttonType = getButtonType(message)
-				if(buttonType){
+				if(buttonType) {
 					(stanza.content as BinaryNode[]).push({
 						tag: 'biz',
 						attrs: { },
@@ -569,17 +576,18 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 	}
 
 	const getButtonArgs = (message: proto.IMessage): BinaryNode['attrs'] => {
-		if(message.templateMessage){
+		if(message.templateMessage) {
 			// TODO: Add attributes
 			return {}
 		} else if(message.listMessage) {
 			const type = message.listMessage.listType
-			if(!type){
-				throw new Boom("Expected list type inside message")
+			if(!type) {
+				throw new Boom('Expected list type inside message')
 			}
-			return {v: '2', type: ListType[type].toLowerCase()};
+
+			return { v: '2', type: ListType[type].toLowerCase() }
 		} else {
-			return {};
+			return {}
 		}
 	}
 
