@@ -82,13 +82,13 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 				to: callFrom,
 			},
 			content: [{
-			    tag: 'reject',
-			    attrs: {
+				tag: 'reject',
+				attrs: {
 					'call-id': callId,
 					'call-creator': callFrom,
 					count: '0',
-			    },
-			    content: undefined,
+				},
+				content: undefined,
 			}],
 		})
 		await query(stanza)
@@ -543,7 +543,12 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 	}
 
 	const handleMessage = async(node: BinaryNode) => {
-		const { fullMessage: msg, category, author, decrypt } = decryptMessageNode(node, authState)
+		const { fullMessage: msg, category, author, decrypt } = decryptMessageNode(
+			node,
+			authState.creds.me!.id,
+			signalRepository,
+			logger,
+		)
 		if(shouldIgnoreJid(msg.key.remoteJid!)) {
 			logger.debug({ key: msg.key }, 'ignored message')
 			await sendMessageAck(node)
