@@ -4,7 +4,7 @@ export enum LabelAssociationType {
   Message = 'label_message'
 }
 
-export type LabelAssociationTypes = `${LabelAssociationType}`
+export type LabelAssociationTypes = LabelAssociationType
 
 /** Association for chat */
 export interface ChatLabelAssociation {
