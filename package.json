@@ -1,10 +1,7 @@
 {
   "name": "@moskoweb/baileys",
-  "version": "5.1.0",
+  "version": "6.0.1",
   "description": "WhatsApp API",
-  "homepage": "https://github.com/moskoweb/Baileys",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
   "keywords": [
     "whatsapp",
     "js-whatsapp",
@@ -15,7 +12,14 @@
     "automation",
     "multi-device"
   ],
+  "homepage": "https://github.com/moskoweb/Baileys",
+  "repository": {
+    "url": "git@github.com:moskoweb/Baileys.git"
+  },
   "license": "MIT",
+  "author": "Mosko Digital",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "files": [
     "lib/*",
     "WAProto/*",
@@ -35,10 +39,6 @@
     "prepare": "tsc",
     "release": "release-it",
     "test": "jest"
-  },
-  "author": "Mosko Digital",
-  "repository": {
-    "url": "git@github.com:moskoweb/baileys.git"
   },
   "dependencies": {
     "@hapi/boom": "^9.1.3",
