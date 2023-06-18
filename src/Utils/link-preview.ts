@@ -48,8 +48,7 @@ export const getUrlInfo = async(
 
 		const { getLinkPreview } = await import('link-preview-js')
 		let previewLink = text
-
-		if (!text.startsWith('https://') && !text.startsWith('http://')) {
+		if(!text.startsWith('https://') && !text.startsWith('http://')) {
 			previewLink = 'https://' + previewLink
 		}
 
@@ -59,11 +58,11 @@ export const getUrlInfo = async(
 			handleRedirects: (baseURL: string, forwardedURL: string) => {
 				const urlObj = new URL(baseURL)
 				const forwardedURLObj = new URL(forwardedURL)
-				if (retries >= maxRetry) {
+				if(retries >= maxRetry) {
 					return false
 				}
 
-				if (
+				if(
 					forwardedURLObj.hostname === urlObj.hostname
 					|| forwardedURLObj.hostname === 'www.' + urlObj.hostname
 					|| 'www.' + forwardedURLObj.hostname === urlObj.hostname
@@ -74,7 +73,6 @@ export const getUrlInfo = async(
 					return false
 				}
 			},
-
 			headers: opts.fetchOpts as {}
 		})
 		if(info && 'title' in info && info.title) {
