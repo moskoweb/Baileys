@@ -1,9 +1,9 @@
-## 6.2.1 (2023-06-07)
+## 6.3.1 (2023-07-08)
 
 
 ### Bug Fixes
 
-* updated proto/version to v2.2323.4 ([#96](https://github.com/WhiskeySockets/Baileys/issues/96)) ([63575e9](https://github.com/WhiskeySockets/Baileys/commit/63575e9b85520bd7621bd16ac0508cdd523a3a43))
+* Added jid of people who added to the group ([#223](https://github.com/WhiskeySockets/Baileys/issues/223)) ([c2d88fd](https://github.com/WhiskeySockets/Baileys/commit/c2d88fddc605f07f4d6990e0d705e3e65140d439))
 
 
 
