@@ -493,6 +493,7 @@ export const generateWAMessageContent = async(
 			protocolMessage: {
 				key: message.edit,
 				editedMessage: m,
+				timestampMs: Date.now(),
 				type: WAProto.Message.ProtocolMessage.Type.MESSAGE_EDIT
 			}
 		}
@@ -542,7 +543,7 @@ export const generateWAMessageFromContent = (
 
 		// if a participant is quoted, then it must be a group
 		// hence, remoteJid of group must also be entered
-		if(quoted.key.participant || quoted.participant) {
+		if(jid !== quoted.key.remoteJid) {
 			contextInfo.remoteJid = quoted.key.remoteJid
 		}
 
@@ -561,11 +562,6 @@ export const generateWAMessageFromContent = (
 			...(message[key].contextInfo || {}),
 			expiration: options.ephemeralExpiration || WA_DEFAULT_EPHEMERAL,
 			//ephemeralSettingTimestamp: options.ephemeralOptions.eph_setting_ts?.toString()
-		}
-		message = {
-			ephemeralMessage: {
-				message
-			}
 		}
 	}
 

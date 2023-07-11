@@ -1,6 +1,6 @@
 {
-  "name": "@whiskeysockets/baileys",
-  "version": "6.3.0",
+  "name": "@moskoweb/baileys",
+  "version": "6.3.1",
   "description": "WhatsApp API",
   "keywords": [
     "whatsapp",
@@ -12,12 +12,12 @@
     "automation",
     "multi-device"
   ],
-  "homepage": "https://github.com/WhiskeySockets/Baileys",
+  "homepage": "https://github.com/moskoweb/Baileys",
   "repository": {
-    "url": "git@github.com:WhiskeySockets/Baileys.git"
+    "url": "git@github.com:moskoweb/Baileys.git"
   },
   "license": "MIT",
-  "author": "Adhiraj Singh",
+  "author": "Mosko Digital",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
