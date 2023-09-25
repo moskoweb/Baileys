@@ -3,6 +3,8 @@ import { Logger } from 'pino'
 import { WAMediaUploadFunction, WAUrlInfo } from '../Types'
 import { prepareWAMessageMedia } from './messages'
 import { extractImageThumb, getHttpStream } from './messages-media'
+import getMetaData from 'metadata-scraper'
+
 
 const THUMBNAIL_WIDTH_PX = 192
 
@@ -42,17 +44,16 @@ export const getUrlInfo = async (
 	},
 ): Promise<WAUrlInfo | undefined> => {
 	try {
-		const linkPreviewGenerator = (await import('link-preview-generator')).default
 		let previewLink = text
 
 		if (!text.startsWith('https://') && !text.startsWith('http://')) {
 			previewLink = 'https://' + previewLink
 		}
 
-		const info = await linkPreviewGenerator(previewLink)
+		const info = await getMetaData(previewLink)
 
 		if (info && 'title' in info && info.title) {
-			const image = info.img
+			const image = info.image;
 
 			const urlInfo: WAUrlInfo = {
 				'canonical-url': previewLink,
@@ -60,6 +61,10 @@ export const getUrlInfo = async (
 				title: info.title,
 				description: info.description,
 				originalThumbnailUrl: image
+			}
+			
+			if(!image) {
+				return urlInfo
 			}
 
 			if (opts.uploadImage) {
