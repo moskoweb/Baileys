@@ -53,7 +53,7 @@
     "metadata-scraper": "^0.2.61",
     "music-metadata": "^7.12.3",
     "node-cache": "^5.1.2",
-    "pino": "^7.0.0",
+    "pino": "^8.1.0",
     "protobufjs": "^6.11.3",
     "uuid": "^9.0.0",
     "ws": "^8.14.0"
